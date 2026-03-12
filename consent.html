@@ -6,269 +6,312 @@
   <title>Meeting Consent</title>
   <script src="https://res.cdn.office.net/teams-js/2.22.0/js/MicrosoftTeams.min.js"></script>
   <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;color:#201f1e;padding:16px;min-height:100vh}
-    .card{background:white;border-radius:8px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-    h1{font-size:18px;color:#0078D4;margin-bottom:4px}
-    .subtitle{font-size:13px;color:#605e5c;margin-bottom:16px}
-    .tabs{display:flex;border-bottom:2px solid #edebe9;margin-bottom:14px}
-    .tab{flex:1;text-align:center;padding:9px 0;cursor:pointer;font-size:13px;
-      border-bottom:2px solid transparent;margin-bottom:-2px;color:#605e5c}
-    .tab.active{color:#0078D4;border-bottom-color:#0078D4;font-weight:700}
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* Identity fields */
-    .field{margin-bottom:10px}
-    .field label{display:block;font-size:12px;font-weight:600;color:#605e5c;margin-bottom:4px}
-    .field input{width:100%;padding:8px 10px;border:1.5px solid #edebe9;border-radius:6px;font-size:13px;outline:none}
-    .field input:focus{border-color:#0078D4}
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f8f9fa;
+      color: #1a1a2e;
+      min-height: 100vh;
+      padding: 20px 16px;
+    }
 
-    /* Consent items */
-    .consent-item{border:1.5px solid #edebe9;border-radius:6px;padding:12px;margin-bottom:10px;
-      cursor:pointer;transition:all .2s}
-    .consent-item.active{border-color:#0078D4;background:#f0f6ff}
-    .consent-item.locked{opacity:.55;pointer-events:none;background:#faf9f8}
-    .consent-row{display:flex;gap:10px;align-items:flex-start}
-    .consent-row input[type=checkbox]{width:16px;height:16px;margin-top:2px;
-      accent-color:#0078D4;flex-shrink:0}
-    .clabel{font-size:13px;font-weight:600}
-    .cdesc{font-size:11px;color:#605e5c;margin-top:3px}
-    .locknote{font-size:11px;color:#a19f9d;margin-top:4px;font-style:italic}
+    /* Header */
+    .header { margin-bottom: 24px; }
+    .header h1 { font-size: 17px; font-weight: 700; color: #1a1a2e; margin-bottom: 2px; }
+    .header p  { font-size: 12px; color: #8a8fa8; }
 
-    /* Buttons */
-    .btn{width:100%;padding:11px;border:none;border-radius:6px;font-size:14px;
-      font-weight:700;cursor:pointer;transition:background .2s}
-    .btn-primary{background:#0078D4;color:white}
-    .btn-primary:hover{background:#106ebe}
-    .btn-primary:disabled{background:#c8c6c4;cursor:not-allowed}
-    .btn-outline{background:white;color:#0078D4;border:1.5px solid #0078D4;margin-bottom:12px}
-    .btn-outline:hover{background:#f0f6ff}
+    /* Tabs */
+    .tabs {
+      display: flex;
+      background: #eef0f6;
+      border-radius: 10px;
+      padding: 3px;
+      margin-bottom: 20px;
+    }
+    .tab {
+      flex: 1; text-align: center; padding: 7px 0;
+      border-radius: 8px; cursor: pointer;
+      font-size: 13px; font-weight: 500; color: #8a8fa8;
+      transition: all .2s;
+    }
+    .tab.active { background: white; color: #1a1a2e; font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+
+    /* User pill */
+    .user-pill {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: white; border-radius: 20px;
+      padding: 5px 12px 5px 5px;
+      font-size: 12px; color: #555;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+      margin-bottom: 20px;
+    }
+    .avatar {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; color: white;
+    }
+
+    /* Fields */
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 11px; font-weight: 600; color: #8a8fa8; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 5px; }
+    .field input {
+      width: 100%; padding: 10px 12px;
+      border: 1.5px solid #eef0f6; border-radius: 10px;
+      font-size: 13px; color: #1a1a2e; background: white;
+      outline: none; transition: border-color .2s;
+    }
+    .field input:focus { border-color: #667eea; }
+
+    /* Consent cards */
+    .consent-cards { display: flex; flex-direction: column; gap: 10px; margin: 20px 0; }
+    .consent-card {
+      background: white; border-radius: 12px;
+      padding: 14px; cursor: pointer;
+      border: 2px solid transparent;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+      transition: all .2s;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .consent-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+    .consent-card.active { border-color: #667eea; background: #f5f4ff; }
+
+    .card-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+      background: #f0f0f8;
+      transition: background .2s;
+    }
+    .consent-card.active .card-icon { background: #ebe8ff; }
+
+    .card-text { flex: 1; }
+    .card-title { font-size: 13px; font-weight: 600; color: #1a1a2e; margin-bottom: 2px; }
+    .card-desc  { font-size: 11px; color: #8a8fa8; line-height: 1.4; }
+
+    .toggle {
+      width: 20px; height: 20px; border-radius: 6px; flex-shrink: 0;
+      border: 2px solid #d0d4e8; background: white;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .2s;
+    }
+    .consent-card.active .toggle {
+      background: #667eea; border-color: #667eea;
+    }
+    .toggle svg { display: none; }
+    .consent-card.active .toggle svg { display: block; }
+
+    /* Submit button */
+    .btn-submit {
+      width: 100%; padding: 13px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white; border: none; border-radius: 12px;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      transition: opacity .2s; margin-top: 4px;
+    }
+    .btn-submit:hover   { opacity: .9; }
+    .btn-submit:disabled { opacity: .5; cursor: not-allowed; }
 
     /* Status */
-    .msg{border-radius:6px;padding:11px;text-align:center;font-size:13px;
-      font-weight:600;margin-top:12px;display:none}
-    .msg.success{background:#dff6dd;color:#107c10;display:block}
-    .msg.error{background:#fde7e9;color:#a4262c;display:block}
-    .msg.loading{background:#f0f6ff;color:#0078D4;display:block}
+    .status {
+      border-radius: 10px; padding: 12px 14px;
+      font-size: 13px; font-weight: 600;
+      text-align: center; margin-top: 12px; display: none;
+    }
+    .status.success { background: #e8f8f0; color: #1a7f4b; display: block; }
+    .status.error   { background: #feeef0; color: #c0392b; display: block; }
+    .status.loading { background: #f0f0ff; color: #667eea; display: block; }
 
     /* Results */
-    #results-panel{display:none}
-    .result-card{border:1px solid #edebe9;border-radius:6px;padding:10px 12px;margin-bottom:8px}
-    .result-row{display:flex;justify-content:space-between;align-items:center}
-    .result-badges{display:flex;gap:6px;margin-top:5px;align-items:center;flex-wrap:wrap}
-    .badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:700}
-    .yes{background:#dff6dd;color:#107c10}
-    .no{background:#fde7e9;color:#a4262c}
-    .time{font-size:11px;color:#a19f9d}
+    #results-panel { display: none; }
+    .refresh-btn {
+      width: 100%; padding: 11px;
+      background: white; color: #667eea;
+      border: 2px solid #eef0f6; border-radius: 12px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      margin-bottom: 14px; transition: all .2s;
+    }
+    .refresh-btn:hover { border-color: #667eea; background: #f5f4ff; }
+
+    .result-item {
+      background: white; border-radius: 12px;
+      padding: 12px 14px; margin-bottom: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .result-top {
+      display: flex; justify-content: space-between;
+      align-items: center; margin-bottom: 8px;
+    }
+    .result-name { font-size: 13px; font-weight: 600; }
+    .result-time { font-size: 11px; color: #8a8fa8; }
+    .result-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+    }
+    .badge-yes { background: #e8f8f0; color: #1a7f4b; }
+    .badge-no  { background: #feeef0; color: #c0392b; }
+    .badge-label { font-weight: 400; opacity: .7; }
   </style>
 </head>
 <body>
-<div class="card">
-  <h1>📋 Meeting Consent</h1>
-  <p class="subtitle">Your choices are recorded for compliance.</p>
+
+  <div class="header">
+    <h1>Meeting Consent</h1>
+    <p>Your choices are recorded for compliance</p>
+  </div>
 
   <div class="tabs">
     <div class="tab active" onclick="showTab('consent')">Give Consent</div>
-    <div class="tab" onclick="showTab('results')">View Results</div>
+    <div class="tab" onclick="showTab('results')">Results</div>
   </div>
 
   <!-- CONSENT TAB -->
   <div id="consent-panel">
 
-    <!-- Identity (pre-filled from Teams if available, editable fallback) -->
     <div class="field">
       <label>Your Name</label>
-      <input id="inp-name" type="text" placeholder="e.g. Alex Thompson"/>
+      <input id="inp-name" type="text" placeholder="Alex Thompson"/>
     </div>
-    <div class="field" style="margin-bottom:14px">
+    <div class="field">
       <label>Your Email</label>
-      <input id="inp-email" type="email" placeholder="e.g. alex@yourorg.com"/>
+      <input id="inp-email" type="email" placeholder="alex@yourorg.com"/>
     </div>
 
-    <!-- Recording consent -->
-    <div class="consent-item" id="item-rec" onclick="toggleRec()">
-      <div class="consent-row">
-        <input type="checkbox" id="chk-rec" onclick="event.stopPropagation()"/>
-        <div>
-          <div class="clabel">🎥 Recording Consent</div>
-          <div class="cdesc">I consent to this meeting being recorded and stored within the organisation.</div>
+    <div class="consent-cards">
+      <div class="consent-card" id="card-rec" onclick="toggle('rec')">
+        <div class="card-icon">🎥</div>
+        <div class="card-text">
+          <div class="card-title">Recording</div>
+          <div class="card-desc">I consent to this meeting being recorded and stored.</div>
+        </div>
+        <div class="toggle" id="tog-rec">
+          <svg width="11" height="9" viewBox="0 0 11 9" fill="none">
+            <path d="M1 4L4 7L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="consent-card" id="card-ai" onclick="toggle('ai')">
+        <div class="card-icon">🤖</div>
+        <div class="card-text">
+          <div class="card-title">AI Transcription</div>
+          <div class="card-desc">I consent to AI being used to transcribe this meeting.</div>
+        </div>
+        <div class="toggle" id="tog-ai">
+          <svg width="11" height="9" viewBox="0 0 11 9" fill="none">
+            <path d="M1 4L4 7L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </div>
       </div>
     </div>
 
-    <!-- AI consent -->
-    <div class="consent-item locked" id="item-ai" onclick="toggleAI()">
-      <div class="consent-row">
-        <input type="checkbox" id="chk-ai" onclick="event.stopPropagation()"/>
-        <div>
-          <div class="clabel">🤖 AI Transcription Consent</div>
-          <div class="cdesc">I consent to AI being used to transcribe this meeting.</div>
-          <div class="locknote" id="locknote">⚠ Requires recording consent first.</div>
-        </div>
-      </div>
-    </div>
+    <button class="btn-submit" id="submit-btn" onclick="submitConsent()">Submit Consent</button>
+    <div class="status" id="status-msg"></div>
 
-    <button class="btn btn-primary" id="submit-btn" onclick="submitConsent()">Submit My Consent</button>
-    <div class="msg" id="status-msg"></div>
   </div>
 
   <!-- RESULTS TAB -->
   <div id="results-panel">
-    <button class="btn btn-outline btn" onclick="loadResults()">🔄 Refresh Results</button>
+    <button class="refresh-btn" onclick="loadResults()">↻ &nbsp;Refresh Results</button>
     <div id="results-content">
-      <p style="color:#605e5c;font-size:12px;text-align:center">Click Refresh to load responses for this meeting.</p>
+      <p style="color:#8a8fa8;font-size:12px;text-align:center;padding:20px 0">Click Refresh to load responses.</p>
     </div>
   </div>
-</div>
 
 <script>
-  // ── CONFIG — replace with your Supabase project values ───────
-  const SUPABASE_URL    = "https://aqsjwbhrdxkfildtvuwx.supabase.co";
-  const SUPABASE_ANON   = "sb_publishable_QClM3SEEYNXkg93VJM_VAw_yakUQOdu";
+  // ── CONFIG ───────────────────────────────────────────────────
+  const SUPABASE_URL  = "https://aqsjwbhrdxkfildtvuwx.supabase.co";
+  const SUPABASE_ANON = "sb_publishable_QClM3SEEYNXkg93VJM_VAw_yakUQOdu";
   // ─────────────────────────────────────────────────────────────
 
-  const API = `${SUPABASE_URL}/rest/v1/meeting_consents`;
-  const HEADERS = {
-    "Content-Type":  "application/json",
-    "apikey":        SUPABASE_ANON,
-    "Authorization": `Bearer ${SUPABASE_ANON}`
-  };
+  const API     = `${SUPABASE_URL}/rest/v1/meeting_consents`;
+  const HEADERS = { "Content-Type": "application/json", "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}` };
 
   let meetingId = "", meetingName = "";
+  const state = { rec: false, ai: false };
 
-  // Try to pre-fill from Teams context
   microsoftTeams.app.initialize().then(() => {
     microsoftTeams.app.getContext().then(ctx => {
       if (ctx.user?.displayName) document.getElementById("inp-name").value  = ctx.user.displayName;
       if (ctx.user?.loginHint)   document.getElementById("inp-email").value = ctx.user.loginHint;
       meetingId   = ctx.meeting?.id   || `manual-${Date.now()}`;
       meetingName = ctx.meeting?.name || "Meeting";
+      // Update avatar initials
+      const name = ctx.user?.displayName || "";
+      document.getElementById("av").textContent = name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
     });
-  }).catch(() => {
-    // Running outside Teams (e.g. browser preview) — manual entry only
-    meetingId = `preview-${Date.now()}`;
-    meetingName = "Preview Meeting";
-  });
+  }).catch(() => { meetingId = `preview-${Date.now()}`; meetingName = "Preview"; });
 
-  function toggleRec() {
+  function toggle(key) {
     if (document.getElementById("submit-btn").disabled) return;
-    const chk = document.getElementById("chk-rec");
-    chk.checked = !chk.checked;
-    const on = chk.checked;
-    document.getElementById("item-rec").classList.toggle("active", on);
-    const ai = document.getElementById("item-ai");
-    if (!on) {
-      document.getElementById("chk-ai").checked = false;
-      ai.classList.remove("active");
-      ai.classList.add("locked");
-      document.getElementById("locknote").style.display = "block";
-    } else {
-      ai.classList.remove("locked");
-      document.getElementById("locknote").style.display = "none";
-    }
-  }
-
-  function toggleAI() {
-    const chk = document.getElementById("chk-ai");
-    chk.checked = !chk.checked;
-    document.getElementById("item-ai").classList.toggle("active", chk.checked);
+    state[key] = !state[key];
+    document.getElementById(`card-${key}`).classList.toggle("active", state[key]);
   }
 
   async function submitConsent() {
     const name  = document.getElementById("inp-name").value.trim();
     const email = document.getElementById("inp-email").value.trim();
-
-    if (!name || !email) {
-      showMsg("error", "Please enter your name and email before submitting.");
-      return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      showMsg("error", "Please enter a valid email address.");
-      return;
-    }
+    if (!name || !email) return showStatus("error", "Please enter your name and email.");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showStatus("error", "Please enter a valid email address.");
 
     const btn = document.getElementById("submit-btn");
     btn.disabled = true;
-    showMsg("loading", "Submitting your consent...");
+    showStatus("loading", "Submitting...");
 
     try {
       const res = await fetch(API, {
         method: "POST",
         headers: { ...HEADERS, "Prefer": "resolution=merge-duplicates" },
-        body: JSON.stringify({
-          meeting_id:     meetingId,
-          meeting_name:   meetingName,
-          user_name:      name,
-          user_email:     email,
-          consent_record: document.getElementById("chk-rec").checked,
-          consent_ai:     document.getElementById("chk-ai").checked
-        })
+        body: JSON.stringify({ meeting_id: meetingId, meeting_name: meetingName, user_name: name, user_email: email, consent_record: state.rec, consent_ai: state.ai })
       });
-
-      if (!res.ok) throw new Error(await res.text());
-      showMsg("success", "✅ Consent recorded. Thank you!");
+      if (!res.ok) throw new Error();
+      showStatus("success", "✓ Consent recorded — thank you!");
       btn.textContent = "Consent Submitted";
-    } catch (e) {
-      showMsg("error", "❌ Something went wrong. Please try again.");
+    } catch {
+      showStatus("error", "Something went wrong. Please try again.");
       btn.disabled = false;
     }
   }
 
   async function loadResults() {
     const email = document.getElementById("inp-email").value.trim();
-    const container = document.getElementById("results-content");
-    container.innerHTML = '<p style="color:#0078D4;font-size:12px;text-align:center">Loading...</p>';
-
+    const el = document.getElementById("results-content");
+    el.innerHTML = '<p style="color:#667eea;font-size:12px;text-align:center;padding:20px 0">Loading...</p>';
     try {
-      // Only show results if this user has submitted for this meeting
-      const check = await fetch(
-        `${API}?meeting_id=eq.${encodeURIComponent(meetingId)}&user_email=eq.${encodeURIComponent(email)}&select=id`,
-        { headers: HEADERS }
-      );
+      const check = await fetch(`${API}?meeting_id=eq.${encodeURIComponent(meetingId)}&user_email=eq.${encodeURIComponent(email)}&select=id`, { headers: HEADERS });
       const found = await check.json();
-      if (!found.length) {
-        container.innerHTML = '<p style="color:#a4262c;font-size:12px;text-align:center">Submit your consent first to view results.</p>';
-        return;
-      }
+      if (!found.length) { el.innerHTML = '<p style="color:#c0392b;font-size:12px;text-align:center;padding:20px 0">Submit your consent first to view results.</p>'; return; }
 
-      const res  = await fetch(
-        `${API}?meeting_id=eq.${encodeURIComponent(meetingId)}&select=user_name,consent_record,consent_ai,created_at&order=created_at.asc`,
-        { headers: HEADERS }
-      );
+      const res  = await fetch(`${API}?meeting_id=eq.${encodeURIComponent(meetingId)}&select=user_name,consent_record,consent_ai,created_at&order=created_at.asc`, { headers: HEADERS });
       const data = await res.json();
+      if (!data.length) { el.innerHTML = '<p style="color:#8a8fa8;font-size:12px;text-align:center;padding:20px 0">No responses yet.</p>'; return; }
 
-      if (!data.length) {
-        container.innerHTML = '<p style="color:#605e5c;font-size:12px;text-align:center">No responses yet.</p>';
-        return;
-      }
-
-      container.innerHTML = data.map(r => `
-        <div class="result-card">
-          <div class="result-row">
-            <span style="font-weight:600;font-size:13px">${r.user_name}</span>
-            <span class="time">${new Date(r.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span>
+      el.innerHTML = data.map(r => `
+        <div class="result-item">
+          <div class="result-top">
+            <span class="result-name">${r.user_name}</span>
+            <span class="result-time">${new Date(r.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span>
           </div>
           <div class="result-badges">
-            <span style="font-size:11px;color:#605e5c">Recording:</span>
-            <span class="badge ${r.consent_record?'yes':'no'}">${r.consent_record?'Yes':'No'}</span>
-            <span style="font-size:11px;color:#605e5c;margin-left:4px">AI:</span>
-            <span class="badge ${r.consent_ai?'yes':'no'}">${r.consent_ai?'Yes':'No'}</span>
+            <span class="badge ${r.consent_record?'badge-yes':'badge-no'}"><span class="badge-label">Recording</span> ${r.consent_record?'Yes':'No'}</span>
+            <span class="badge ${r.consent_ai?'badge-yes':'badge-no'}"><span class="badge-label">AI</span> ${r.consent_ai?'Yes':'No'}</span>
           </div>
         </div>`).join("");
-    } catch {
-      container.innerHTML = '<p style="color:#a4262c;font-size:12px;text-align:center">Could not load results.</p>';
-    }
+    } catch { el.innerHTML = '<p style="color:#c0392b;font-size:12px;text-align:center;padding:20px 0">Could not load results.</p>'; }
   }
 
   function showTab(t) {
-    document.querySelectorAll(".tab").forEach((el,i) =>
-      el.classList.toggle("active",(i===0&&t==="consent")||(i===1&&t==="results")));
+    document.querySelectorAll(".tab").forEach((el,i) => el.classList.toggle("active",(i===0&&t==="consent")||(i===1&&t==="results")));
     document.getElementById("consent-panel").style.display = t==="consent"?"block":"none";
     document.getElementById("results-panel").style.display  = t==="results"?"block":"none";
   }
 
-  function showMsg(type, text) {
+  function showStatus(type, text) {
     const el = document.getElementById("status-msg");
-    el.className = `msg ${type}`;
+    el.className = `status ${type}`;
     el.textContent = text;
   }
 </script>
