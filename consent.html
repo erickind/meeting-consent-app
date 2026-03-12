@@ -217,12 +217,21 @@
   const state = { rec: false, ai: false };
 
   microsoftTeams.app.initialize().then(() => {
+    // Enable the Save button when added to a meeting
+    microsoftTeams.pages.config.registerOnSaveHandler(evt => {
+      microsoftTeams.pages.config.setConfig({
+        suggestedDisplayName: "Meeting Consent",
+        contentUrl: window.location.href
+      });
+      evt.notifySuccess();
+    });
+    microsoftTeams.pages.config.setValidityState(true);
+
     microsoftTeams.app.getContext().then(ctx => {
       if (ctx.user?.displayName) document.getElementById("inp-name").value  = ctx.user.displayName;
       if (ctx.user?.loginHint)   document.getElementById("inp-email").value = ctx.user.loginHint;
       meetingId   = ctx.meeting?.id   || `manual-${Date.now()}`;
       meetingName = ctx.meeting?.name || "Meeting";
-      // Update avatar initials
       const name = ctx.user?.displayName || "";
       document.getElementById("av").textContent = name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
     });
