@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Meeting Consent</title>
+  <script src="https://res.cdn.office.net/teams-js/2.22.0/js/MicrosoftTeams.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;color:#201f1e;padding:16px;min-height:100vh}
+    .card{background:white;border-radius:8px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+    h1{font-size:18px;color:#0078D4;margin-bottom:4px}
+    .subtitle{font-size:13px;color:#605e5c;margin-bottom:16px}
+    .tabs{display:flex;border-bottom:2px solid #edebe9;margin-bottom:14px}
+    .tab{flex:1;text-align:center;padding:9px 0;cursor:pointer;font-size:13px;
+      border-bottom:2px solid transparent;margin-bottom:-2px;color:#605e5c}
+    .tab.active{color:#0078D4;border-bottom-color:#0078D4;font-weight:700}
+
+    /* Identity fields */
+    .field{margin-bottom:10px}
+    .field label{display:block;font-size:12px;font-weight:600;color:#605e5c;margin-bottom:4px}
+    .field input{width:100%;padding:8px 10px;border:1.5px solid #edebe9;border-radius:6px;font-size:13px;outline:none}
+    .field input:focus{border-color:#0078D4}
+
+    /* Consent items */
+    .consent-item{border:1.5px solid #edebe9;border-radius:6px;padding:12px;margin-bottom:10px;
+      cursor:pointer;transition:all .2s}
+    .consent-item.active{border-color:#0078D4;background:#f0f6ff}
+    .consent-item.locked{opacity:.55;pointer-events:none;background:#faf9f8}
+    .consent-row{display:flex;gap:10px;align-items:flex-start}
+    .consent-row input[type=checkbox]{width:16px;height:16px;margin-top:2px;
+      accent-color:#0078D4;flex-shrink:0}
+    .clabel{font-size:13px;font-weight:600}
+    .cdesc{font-size:11px;color:#605e5c;margin-top:3px}
+    .locknote{font-size:11px;color:#a19f9d;margin-top:4px;font-style:italic}
+
+    /* Buttons */
+    .btn{width:100%;padding:11px;border:none;border-radius:6px;font-size:14px;
+      font-weight:700;cursor:pointer;transition:background .2s}
+    .btn-primary{background:#0078D4;color:white}
+    .btn-primary:hover{background:#106ebe}
+    .btn-primary:disabled{background:#c8c6c4;cursor:not-allowed}
+    .btn-outline{background:white;color:#0078D4;border:1.5px solid #0078D4;margin-bottom:12px}
+    .btn-outline:hover{background:#f0f6ff}
+
+    /* Status */
+    .msg{border-radius:6px;padding:11px;text-align:center;font-size:13px;
+      font-weight:600;margin-top:12px;display:none}
+    .msg.success{background:#dff6dd;color:#107c10;display:block}
+    .msg.error{background:#fde7e9;color:#a4262c;display:block}
+    .msg.loading{background:#f0f6ff;color:#0078D4;display:block}
+
+    /* Results */
+    #results-panel{display:none}
+    .result-card{border:1px solid #edebe9;border-radius:6px;padding:10px 12px;margin-bottom:8px}
+    .result-row{display:flex;justify-content:space-between;align-items:center}
+    .result-badges{display:flex;gap:6px;margin-top:5px;align-items:center;flex-wrap:wrap}
+    .badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:700}
+    .yes{background:#dff6dd;color:#107c10}
+    .no{background:#fde7e9;color:#a4262c}
+    .time{font-size:11px;color:#a19f9d}
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>📋 Meeting Consent</h1>
+  <p class="subtitle">Your choices are recorded for compliance.</p>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('consent')">Give Consent</div>
+    <div class="tab" onclick="showTab('results')">View Results</div>
+  </div>
+
+  <!-- CONSENT TAB -->
+  <div id="consent-panel">
+
+    <!-- Identity (pre-filled from Teams if available, editable fallback) -->
+    <div class="field">
+      <label>Your Name</label>
+      <input id="inp-name" type="text" placeholder="e.g. Alex Thompson"/>
+    </div>
+    <div class="field" style="margin-bottom:14px">
+      <label>Your Email</label>
+      <input id="inp-email" type="email" placeholder="e.g. alex@yourorg.com"/>
+    </div>
+
+    <!-- Recording consent -->
+    <div class="consent-item" id="item-rec" onclick="toggleRec()">
+      <div class="consent-row">
+        <input type="checkbox" id="chk-rec" onclick="event.stopPropagation()"/>
+        <div>
+          <div class="clabel">🎥 Recording Consent</div>
+          <div class="cdesc">I consent to this meeting being recorded and stored within the organisation.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI consent -->
+    <div class="consent-item locked" id="item-ai" onclick="toggleAI()">
+      <div class="consent-row">
+        <input type="checkbox" id="chk-ai" onclick="event.stopPropagation()"/>
+        <div>
+          <div class="clabel">🤖 AI Transcription Consent</div>
+          <div class="cdesc">I consent to AI being used to transcribe this meeting.</div>
+          <div class="locknote" id="locknote">⚠ Requires recording consent first.</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="submit-btn" onclick="submitConsent()">Submit My Consent</button>
+    <div class="msg" id="status-msg"></div>
+  </div>
+
+  <!-- RESULTS TAB -->
+  <div id="results-panel">
+    <button class="btn btn-outline btn" onclick="loadResults()">🔄 Refresh Results</button>
+    <div id="results-content">
+      <p style="color:#605e5c;font-size:12px;text-align:center">Click Refresh to load responses for this meeting.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── CONFIG — replace with your Supabase project values ───────
+  const SUPABASE_URL    = "https://aqsjwbhrdxkfildtvuwx.supabase.co";
+  const SUPABASE_ANON   = "sb_publishable_QClM3SEEYNXkg93VJM_VAw_yakUQOdu";
+  // ─────────────────────────────────────────────────────────────
+
+  const API = `${SUPABASE_URL}/rest/v1/meeting_consents`;
+  const HEADERS = {
+    "Content-Type":  "application/json",
+    "apikey":        SUPABASE_ANON,
+    "Authorization": `Bearer ${SUPABASE_ANON}`
+  };
+
+  let meetingId = "", meetingName = "";
+
+  // Try to pre-fill from Teams context
+  microsoftTeams.app.initialize().then(() => {
+    microsoftTeams.app.getContext().then(ctx => {
+      if (ctx.user?.displayName) document.getElementById("inp-name").value  = ctx.user.displayName;
+      if (ctx.user?.loginHint)   document.getElementById("inp-email").value = ctx.user.loginHint;
+      meetingId   = ctx.meeting?.id   || `manual-${Date.now()}`;
+      meetingName = ctx.meeting?.name || "Meeting";
+    });
+  }).catch(() => {
+    // Running outside Teams (e.g. browser preview) — manual entry only
+    meetingId = `preview-${Date.now()}`;
+    meetingName = "Preview Meeting";
+  });
+
+  function toggleRec() {
+    if (document.getElementById("submit-btn").disabled) return;
+    const chk = document.getElementById("chk-rec");
+    chk.checked = !chk.checked;
+    const on = chk.checked;
+    document.getElementById("item-rec").classList.toggle("active", on);
+    const ai = document.getElementById("item-ai");
+    if (!on) {
+      document.getElementById("chk-ai").checked = false;
+      ai.classList.remove("active");
+      ai.classList.add("locked");
+      document.getElementById("locknote").style.display = "block";
+    } else {
+      ai.classList.remove("locked");
+      document.getElementById("locknote").style.display = "none";
+    }
+  }
+
+  function toggleAI() {
+    const chk = document.getElementById("chk-ai");
+    chk.checked = !chk.checked;
+    document.getElementById("item-ai").classList.toggle("active", chk.checked);
+  }
+
+  async function submitConsent() {
+    const name  = document.getElementById("inp-name").value.trim();
+    const email = document.getElementById("inp-email").value.trim();
+
+    if (!name || !email) {
+      showMsg("error", "Please enter your name and email before submitting.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showMsg("error", "Please enter a valid email address.");
+      return;
+    }
+
+    const btn = document.getElementById("submit-btn");
+    btn.disabled = true;
+    showMsg("loading", "Submitting your consent...");
+
+    try {
+      const res = await fetch(API, {
+        method: "POST",
+        headers: { ...HEADERS, "Prefer": "resolution=merge-duplicates" },
+        body: JSON.stringify({
+          meeting_id:     meetingId,
+          meeting_name:   meetingName,
+          user_name:      name,
+          user_email:     email,
+          consent_record: document.getElementById("chk-rec").checked,
+          consent_ai:     document.getElementById("chk-ai").checked
+        })
+      });
+
+      if (!res.ok) throw new Error(await res.text());
+      showMsg("success", "✅ Consent recorded. Thank you!");
+      btn.textContent = "Consent Submitted";
+    } catch (e) {
+      showMsg("error", "❌ Something went wrong. Please try again.");
+      btn.disabled = false;
+    }
+  }
+
+  async function loadResults() {
+    const email = document.getElementById("inp-email").value.trim();
+    const container = document.getElementById("results-content");
+    container.innerHTML = '<p style="color:#0078D4;font-size:12px;text-align:center">Loading...</p>';
+
+    try {
+      // Only show results if this user has submitted for this meeting
+      const check = await fetch(
+        `${API}?meeting_id=eq.${encodeURIComponent(meetingId)}&user_email=eq.${encodeURIComponent(email)}&select=id`,
+        { headers: HEADERS }
+      );
+      const found = await check.json();
+      if (!found.length) {
+        container.innerHTML = '<p style="color:#a4262c;font-size:12px;text-align:center">Submit your consent first to view results.</p>';
+        return;
+      }
+
+      const res  = await fetch(
+        `${API}?meeting_id=eq.${encodeURIComponent(meetingId)}&select=user_name,consent_record,consent_ai,created_at&order=created_at.asc`,
+        { headers: HEADERS }
+      );
+      const data = await res.json();
+
+      if (!data.length) {
+        container.innerHTML = '<p style="color:#605e5c;font-size:12px;text-align:center">No responses yet.</p>';
+        return;
+      }
+
+      container.innerHTML = data.map(r => `
+        <div class="result-card">
+          <div class="result-row">
+            <span style="font-weight:600;font-size:13px">${r.user_name}</span>
+            <span class="time">${new Date(r.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span>
+          </div>
+          <div class="result-badges">
+            <span style="font-size:11px;color:#605e5c">Recording:</span>
+            <span class="badge ${r.consent_record?'yes':'no'}">${r.consent_record?'Yes':'No'}</span>
+            <span style="font-size:11px;color:#605e5c;margin-left:4px">AI:</span>
+            <span class="badge ${r.consent_ai?'yes':'no'}">${r.consent_ai?'Yes':'No'}</span>
+          </div>
+        </div>`).join("");
+    } catch {
+      container.innerHTML = '<p style="color:#a4262c;font-size:12px;text-align:center">Could not load results.</p>';
+    }
+  }
+
+  function showTab(t) {
+    document.querySelectorAll(".tab").forEach((el,i) =>
+      el.classList.toggle("active",(i===0&&t==="consent")||(i===1&&t==="results")));
+    document.getElementById("consent-panel").style.display = t==="consent"?"block":"none";
+    document.getElementById("results-panel").style.display  = t==="results"?"block":"none";
+  }
+
+  function showMsg(type, text) {
+    const el = document.getElementById("status-msg");
+    el.className = `msg ${type}`;
+    el.textContent = text;
+  }
+</script>
+</body>
+</html>
